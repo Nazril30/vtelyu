@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import {getMessaging, getToken, deleteToken, onMessage} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
 
-const firebaseConfig = {
+// Firebase configuration di project setting -> General 
+const firebaseConfig = { 
   apiKey: "AIzaSyBGM19XQWBU3QLQD8hOE2AFJxYg5AdaRNI",
   authDomain: "vtelyu-3207b.firebaseapp.com",
   databaseURL: "https://vtelyu-3207b-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -42,7 +43,7 @@ window.enableFCM = async function () {
   }
   const registration = await navigator.serviceWorker.ready;
   try {const token = await getToken(messaging, {
-      vapidKey: "BF3mYLlYII1BVOs2VkVk-ac5VH3e6zAMaqxDiv6xPwtQteUE1LMfDGDC01K9kwEQHEBzUzei94g5T2LFlkCW7mc",
+      vapidKey: "BE2c88nev-lHX6l_wrW2CoI86EEgX2Ybez9QdaD7ptpUi0Jx4SbBSbu4bQe_PX-B8g1eIrsbhSt7UIMa7coZsnE", // VAPID key from Firebase project settings -> Cloud Messaging
       serviceWorkerRegistration: registration
     });
     if (!token) {alert("Failed to get FCM token");
@@ -50,7 +51,7 @@ window.enableFCM = async function () {
     }
     localStorage.setItem("fcmToken", token);
     localStorage.setItem("notificationsEnabled", "true");
-    await fetch("https://vtelyu.iffatadibamusaffa.workers.dev/register-token", {method: "POST", body: token});
+    await fetch("https://vtelyu.nazrielariel2005.workers.dev/register-token", {method: "POST", body: token}); // 
     console.log("FCM TOKEN:", token);
     console.log("Token Sent to Cloudflare");
     return token;
@@ -65,7 +66,7 @@ window.disableFCM = async function () {
   if (!token) {localStorage.setItem("notificationsEnabled", "false");
     return;
   }
-  try {await fetch("https://vtelyu.iffatadibamusaffa.workers.dev/unregister-token", {
+  try {await fetch("https://vtelyu.nazrielariel2005.workers.dev/unregister-token", {
       method: "POST",
       body: token
     });
