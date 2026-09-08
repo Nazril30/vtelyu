@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VTelYU</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VTelYU - Smart RVM Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,34 +14,71 @@
 
 <body>
 
+  <!-- Header Navigation -->
   <header>
-    <img src="img/VTelYU.png" alt="VTelYU Logo" class="header-logo">
+    <div class="brand-container">
+      <img src="img/VTelYU.png" alt="VTelYU Logo" class="header-logo">
+      <span class="brand-tagline">RVM Monitoring System</span>
+    </div>
+
     <div class="dropdown">
-      <button class="menu-trigger" id="menuBtn">Menu ▾</button>
+      <button class="menu-trigger" id="menuBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        <span>Menu</span>
+        <small>▾</small>
+      </button>
       <div class="dropdown-content" id="dropdownMenu">
         <button class="enable-notif" id="notifBtn">Loading...</button>
         <button class="enable-notif" id="viewToggleBtn">Lihat lokasi unit</button>
         <button class="enable-notif disabled" id="locationToggleBtn" style="display: none;">Akses Lokasi OFF</button>
-        <div id="authSection" style="display: none; align-items: center; gap: 8px;">
-          <button class="enable-notif" id="logoutBtn"
-            style="padding: 10px 14px; background: #ef4444; border: none; color: white; border-radius: 12px; cursor: pointer;">
-            <span id="userEmail" style="font-size: 0.85rem; color: #000000;"></span> Logout &rarr;
+        <div id="authSection" style="display: none;">
+          <div class="user-profile-badge">
+            <span id="userEmail"></span>
+          </div>
+          <button class="enable-notif logout-btn" id="logoutBtn">
+            Logout &rarr;
           </button>
         </div>
       </div>
     </div>
   </header>
 
+  <!-- Login Modal Overlay -->
   <div id="loginOverlay">
     <div class="login-card">
-      <h2 style="margin-top: 0;">Login to VTelYU</h2>
-      <input type="email" id="email" placeholder="Email">
-      <input type="password" id="password" placeholder="Password">
-      <button id="loginBtn">Login</button>
-      <p id="errorMsg" style="color: #ef4444; margin-top: 15px;"></p>
+      <div class="login-brand">
+        <img src="img/VTelYU.png" alt="VTelYU Logo" class="login-logo">
+      </div>
+      
+      <div class="login-header">
+        <h2>Selamat Datang</h2>
+        <p>Silakan masuk untuk mengakses Dashboard VTelYU RVM</p>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <div class="input-wrapper">
+          <input type="email" id="email" placeholder="nama@email.com" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" placeholder="••••••••">
+        </div>
+      </div>
+
+      <button id="loginBtn">
+        <span>Masuk Dashboard</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+
+      <p id="errorMsg"></p>
     </div>
   </div>
 
+  <!-- Main Dashboard Grid -->
   <main id="dashboard">
     <section class="card" data-template="true" aria-label="RVM Unit">
       <span class="status-text" style="display: none;">Offline</span>
@@ -60,11 +97,10 @@
 
       <div class="card-body-custom">
         <div class="card-left-col">
-          <div class="section-title">Volume sampah waktu nyata</div>
+          <div class="section-title">Volume Sampah Realtime</div>
           <div class="volume-bars-custom">
             <div class="vol-bar-container">
               <div class="vol-bar">
-                <!-- Fixed Image Path -->
                 <img src="img/plastik.png" class="bg-img" alt="botol plastik">
                 <div class="fill-plastic-bar" style="height:0%"></div>
               </div>
@@ -72,7 +108,6 @@
             </div>
             <div class="vol-bar-container">
               <div class="vol-bar">
-                <!-- Fixed Image Path -->
                 <img src="img/kaleng.png" class="bg-img" alt="kaleng">
                 <div class="fill-can-bar" style="height:0%"></div>
               </div>
@@ -80,15 +115,13 @@
             </div>
           </div>
 
-          <div class="section-title">Counting waktu nyata</div>
+          <div class="section-title">Counting Realtime</div>
           <div class="counting-boxes">
             <div class="count-box">
-              <!-- Fixed Image Path -->
               <img src="img/plastik.png" alt="plastik icon" class="icon-img">
               <span class="plastic-val">-</span>
             </div>
             <div class="count-box">
-              <!-- Fixed Image Path -->
               <img src="img/kaleng.png" alt="kaleng icon" class="icon-img">
               <span class="can-val">-</span>
             </div>
@@ -98,40 +131,44 @@
         <div class="card-divider"></div>
 
         <div class="card-right-col">
-          <div>
-            <div class="section-title">Total hari ini</div>
+          <div class="totals-wrapper">
+            <div class="section-title">Total Hari Ini</div>
             <div class="totals-container">
               <div class="total-item">
-                <!-- Fixed Image Path -->
                 <img src="img/plastik.png" alt="plastik icon" class="icon-img-large">
                 <span><span class="total-plastic-cum">0</span>%</span>
               </div>
               <div class="total-item">
-                <!-- Fixed Image Path -->
                 <img src="img/kaleng.png" alt="kaleng icon" class="icon-img-large">
                 <span><span class="total-can-cum">0</span>%</span>
               </div>
             </div>
           </div>
-          <button class="camera-btn camera-btn-custom">Live Feed</button>
-          <button class="history-btn history-btn-custom">History</button>
+          <div class="action-buttons-group">
+            <button class="camera-btn camera-btn-custom">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              <span>Live Feed</span>
+            </button>
+            <button class="history-btn history-btn-custom">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span>History</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <div id="map-container" style="display: none; position: relative; height: calc(100vh - 100px); padding: 20px;">
-    <div id="map" style="width: 100%; height: 100%; border-radius: 22px; z-index: 1;"></div>
-    <div id="proximity-alert"
-      style="display: none; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 2000; background: #10b981; color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-      Kamu berada di dekat RVM!
+  <!-- Interactive Map Section -->
+  <div id="map-container" style="display: none;">
+    <div id="map"></div>
+    <div id="proximity-alert" style="display: none;">
+      <span>📍 Kamu berada di dekat RVM!</span>
     </div>
 
-    <!-- The Popup Card Container -->
-    <div id="active-card-container"
-      style="position: absolute; top: 40px; right: 40px; width: 380px; z-index: 1000; display: none;">
+    <!-- Active Card Popup on Map -->
+    <div id="active-card-container" style="display: none;">
       <section class="card" id="active-card">
-        <!-- Changed onclick to an ID for module scoping -->
         <button class="close-card-btn" id="closeMapCardBtn">×</button>
         <span class="status-text" style="display: none;">Offline</span>
         <span class="total-val" style="display: none;">-</span>
@@ -149,7 +186,7 @@
 
         <div class="card-body-custom">
           <div class="card-left-col">
-            <div class="section-title">Volume sampah waktu nyata</div>
+            <div class="section-title">Volume Sampah Realtime</div>
             <div class="volume-bars-custom">
               <div class="vol-bar-container">
                 <div class="vol-bar">
@@ -167,7 +204,7 @@
               </div>
             </div>
 
-            <div class="section-title">Counting waktu nyata</div>
+            <div class="section-title">Counting Realtime</div>
             <div class="counting-boxes">
               <div class="count-box">
                 <img src="img/plastik.png" alt="plastik icon" class="icon-img">
@@ -183,8 +220,8 @@
           <div class="card-divider"></div>
 
           <div class="card-right-col">
-            <div>
-              <div class="section-title">Total hari ini</div>
+            <div class="totals-wrapper">
+              <div class="section-title">Total Hari Ini</div>
               <div class="totals-container">
                 <div class="total-item">
                   <img src="img/plastik.png" alt="plastik icon" class="icon-img-large">
@@ -196,19 +233,28 @@
                 </div>
               </div>
             </div>
-            <button class="camera-btn camera-btn-custom">Live Feed</button>
-            <button class="history-btn history-btn-custom">History</button>
+            <div class="action-buttons-group">
+              <button class="camera-btn camera-btn-custom">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                <span>Live Feed</span>
+              </button>
+              <button class="history-btn history-btn-custom">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>History</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
     </div>
   </div>
 
+  <!-- Live Feed Modal -->
   <div id="cameraOverlay" aria-hidden="true">
     <div class="camera-card">
       <div class="header-row">
         <h2 id="cameraTitle">Live Feed</h2>
-        <button id="closeCamera">Close</button>
+        <button id="closeCamera">Tutup</button>
       </div>
       <div class="feed-container">
         <img id="cameraFeed" src="" alt="Camera Feed">
@@ -216,11 +262,12 @@
     </div>
   </div>
 
+  <!-- History Modal Overlay -->
   <div id="backdrop" aria-hidden="true"></div>
   <div id="historyContainer" aria-hidden="true">
     <div id="historyHeader">
       <h2>History for <span id="historyTitle">-</span></h2>
-      <div><button id="closeHistory">Close</button></div>
+      <div><button id="closeHistory">×</button></div>
     </div>
     <div id="historyBody">
       <div class="left-column">
@@ -233,7 +280,9 @@
               <option value="5000">5000</option>
             </select>
           </div>
-          <canvas id="dailyChart"></canvas>
+          <div class="chart-wrapper">
+            <canvas id="dailyChart"></canvas>
+          </div>
         </div>
 
         <div class="chart-card">
@@ -245,9 +294,12 @@
               <option value="50000">50000</option>
             </select>
           </div>
-          <canvas id="weeklyChart"></canvas>
+          <div class="chart-wrapper">
+            <canvas id="weeklyChart"></canvas>
+          </div>
         </div>
       </div>
+      
       <div class="right-column">
         <div class="table-card">
           <div id="dateFilterContainer" class="date-filter-container">
@@ -256,17 +308,19 @@
             <input type="date" id="endDateFilter" class="date-input">
             <button id="applyDateFilter" class="history-btn filter-btn">Filter</button>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Plastik</th>
-                <th>Kaleng</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody id="historyTable"></tbody>
-          </table>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>DATE</th>
+                  <th>PLASTIK</th>
+                  <th>KALENG</th>
+                  <th>TOTAL</th>
+                </tr>
+              </thead>
+              <tbody id="historyTable"></tbody>
+            </table>
+          </div>
           <div class="history-nav">
             <button id="prevWeekBtn" class="history-btn">⬅ Previous</button>
             <button id="nextWeekBtn" class="history-btn">Next ➡</button>
@@ -276,6 +330,7 @@
     </div>
   </div>
 
+  <!-- App Script Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -300,8 +355,6 @@
     const authSection = document.getElementById('authSection');
     const userEmailSpan = document.getElementById('userEmail');
 
-    // Kept your old Worker API URL for History fetches (if history isn't moved to Firebase yet)
-    // database on firebase is a paid service, so I will keep the history data on cloudflare worker for now.
     const API_URL = "vtelyu.nazrielariel2005.workers.dev";
 
     function startApp() {
@@ -330,7 +383,6 @@
           const uptimeEl = card.querySelector('.rvm-uptime');
           const lastSeenEl = card.querySelector('.rvm-lastseen');
 
-          // Status update (Defaults to Online if property is missing)
           statusDot.classList.remove('online', 'offline');
           const isOnline = (device.status === "online");
 
@@ -346,7 +398,6 @@
 
           uptimeEl.innerText = "Waktu Aktif : " + formatUptime(device.uptime);
 
-          // Last Seen update (Defaults to "-" if property is missing)
           const lastSeenStr = device.lastSeen ? formatLastSeen(device.lastSeen) : "-";
           lastSeenEl.innerText = "Terakhir Aktif : " + lastSeenStr;
 
@@ -365,14 +416,12 @@
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is logged in
         overlay.style.display = 'none';
         dashboard.style.display = 'grid';
         authSection.style.display = 'flex';
         userEmailSpan.innerText = user.email;
         startApp();
       } else {
-        // User is logged out
         overlay.style.display = 'flex';
         dashboard.style.display = 'none';
         authSection.style.display = 'none';
@@ -386,7 +435,6 @@
       signInWithEmailAndPassword(auth, email, password)
         .catch((error) => {
           document.getElementById('errorMsg').innerText = "Login failed: Invalid email or password.";
-          // document.getElementById('errorMsg').innerText = "Login failed: " + error.message;
         });
     });
 
@@ -466,7 +514,6 @@
         clone.querySelector('.camera-btn').setAttribute('data-id', device.mac);
         clone.querySelector('.history-btn').setAttribute('data-id', device.mac);
 
-        // Status fallback: Assume online if not defined in RTDB
         const statusClass = (device.status === "offline") ? "offline" : "online";
         clone.querySelector('.status-dot').classList.remove('online', 'offline');
         clone.querySelector('.status-dot').classList.add(statusClass);
@@ -543,16 +590,14 @@
         const rvmIndex = card.getAttribute('data-index') || "1";
         if (id) {
           openCamera(locName, rvmIndex);
-          // Add this line to hide the popup card
           document.getElementById('active-card-container').style.display = 'none';
         }
       }
     });
 
-    // History & Charts
-    let fullHistoryData = []; // NEW: Stores the original fetch to allow filtering without re-fetching
+    let fullHistoryData = [];
     let historyData = [], weekIndex = 0, dailyChartInstance = null, weeklyChartInstance = null, dailyMax = 1000, weeklyMax = 10000;
-    function parseDateString(dateStr) { // Helper function to safely read DD-MM-YYYY strings globally
+    function parseDateString(dateStr) {
       if (!dateStr) return 0;
       const dateOnly = dateStr.split(' ')[0];
       const parts = dateOnly.split('-');
@@ -642,11 +687,10 @@
       document.getElementById('prevWeekBtn').disabled = (weekIndex === 0);
     }
 
-    // NOTE: History data is still pulling from your Cloudflare Worker, If you plan to move the history to Firebase later, this function will need to change.
     async function showHistory(deviceId, locationName) {
       document.getElementById('backdrop').style.display = 'block';
       const hist = document.getElementById('historyContainer');
-      hist.style.display = 'block';
+      hist.style.display = 'flex';
       hist.setAttribute('aria-hidden', 'false');
       document.getElementById('historyTitle').innerText = locationName;
 
@@ -667,7 +711,6 @@
         if (!response.ok) throw new Error(response.status);
         let data = await response.json();
 
-        // Filter using the MASKED device ID and sort
         fullHistoryData = data
           .filter(row => row.mac === maskedDeviceId)
           .sort((a, b) => parseDateString(a.timestamp) - parseDateString(b.timestamp));
@@ -693,7 +736,6 @@
             endInput.min = startInput.value;
           });
 
-          // When end date changes, the start date cannot be later than it
           endInput.addEventListener('change', () => {
             startInput.max = endInput.value;
           });
@@ -710,35 +752,29 @@
             const startTimestamp = new Date(startVal).getTime();
             const endTimestamp = new Date(endVal + 'T23:59:59').getTime();
 
-            // Final fallback validation to prevent reversed range
             if (startTimestamp > endTimestamp) {
               alert("Tanggal mulai tidak boleh lebih besar dari tanggal akhir (Start date cannot be after end date).");
               return;
             }
 
-            // Filter against the uncensored dataset
             historyData = fullHistoryData.filter(row => {
               const rowTime = parseDateString(row.timestamp);
               return rowTime >= startTimestamp && rowTime <= endTimestamp;
             });
 
-            // Reset pagination and redraw charts
             weekIndex = 0;
             renderWeek();
           });
 
-          // Set values
           startInput.value = oldestDateStr;
           endInput.value = newestDateStr;
 
-          // Restrict users from picking dates outside the available dataset
           startInput.min = oldestDateStr;
           startInput.max = newestDateStr;
           endInput.min = oldestDateStr;
           endInput.max = newestDateStr;
         }
 
-        // Load the full dataset into the active view
         historyData = [...fullHistoryData];
         weekIndex = 0;
         renderWeek();
@@ -801,14 +837,13 @@
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(mapInstance);
 
-      // Add the marker and attach the click event
       latestDevices.forEach((device, index) => {
         if (device.location && device.location.includes(',')) {
           const [lat, lng] = device.location.split(',').map(Number);
           L.marker([lat, lng])
             .addTo(mapInstance)
             .bindTooltip(device.locationname || device.mac)
-            .on('click', () => selectDevice(device.mac, index + 1)); // <-- Added click event here
+            .on('click', () => selectDevice(device.mac, index + 1));
         }
       });
 
@@ -843,7 +878,6 @@
       }
     }
 
-    // Function to update the map card when a marker is clicked
     function selectDevice(mac, rvmIndex) {
       const device = latestDevices.find(d => d.mac === mac);
       if (!device) return;
@@ -851,17 +885,14 @@
       const activeCard = document.getElementById('active-card');
       const activeContainer = document.getElementById('active-card-container');
 
-      // Update Header Info
       activeCard.querySelector('.rvm-title').innerText = device.locationname || mac;
       activeCard.querySelector('.rvm-uptime').innerText = "Waktu Aktif : " + formatUptime(device.uptime);
       activeCard.querySelector('.rvm-lastseen').innerText = "Terakhir Aktif : " + (device.lastSeen ? formatLastSeen(device.lastSeen) : "-");
 
-      // Update Status
       const isOnline = (device.status === "online");
       const statusDot = activeCard.querySelector('.status-dot');
       statusDot.className = `status-dot ${isOnline ? 'online' : 'offline'}`;
 
-      // Update Bar/Chart Values (Re-uses your existing function!)
       const values = {
         plastic: device.plastic,
         can: device.can,
@@ -872,7 +903,6 @@
       };
       updateCardFromValues(activeCard, values);
 
-      // Pass data attributes so History and Live Feed buttons know which unit is active
       activeCard.querySelector('.camera-btn').setAttribute('data-id', device.mac);
       activeCard.querySelector('.camera-btn').setAttribute('data-locname', device.locationname || mac);
       activeCard.querySelector('.camera-btn').setAttribute('data-index', rvmIndex);
@@ -880,16 +910,13 @@
       activeCard.querySelector('.history-btn').setAttribute('data-id', device.mac);
       activeCard.querySelector('.history-btn').setAttribute('data-locname', device.locationname || mac);
 
-      // Show the card
       activeContainer.style.display = 'block';
     }
 
-    // Logic to close the card using the X button
     document.getElementById('closeMapCardBtn').addEventListener('click', () => {
       document.getElementById('active-card-container').style.display = 'none';
     });
 
-    // Attach the listener
     document.getElementById('viewToggleBtn').addEventListener('click', toggleView);
 
     document.addEventListener('click', function (e) {
@@ -899,7 +926,6 @@
         const locName = btn.closest('.card').getAttribute('data-locname') || id;
         if (id) {
           showHistory(id, locName);
-          // Add this line to hide the popup card
           document.getElementById('active-card-container').style.display = 'none';
         }
       }
@@ -908,14 +934,13 @@
     let watchId = null;
     let userMarker = null;
     let isLocationEnabled = false;
-    const PROXIMITY_THRESHOLD = 50; // Alert triggers if user is within 50 meters of an RVM
+    const PROXIMITY_THRESHOLD = 50;
 
     function toggleLocationTracking() {
       const btn = document.getElementById('locationToggleBtn');
 
       if (!isLocationEnabled) {
         if ("geolocation" in navigator) {
-          // Start tracking the user
           watchId = navigator.geolocation.watchPosition(
             (position) => {
               const userLat = position.coords.latitude;
@@ -923,7 +948,6 @@
               const userLatLng = L.latLng(userLat, userLng);
 
               if (mapInitialized && map) {
-                // 1. Create or update the blue user marker
                 if (!userMarker) {
                   const userIcon = L.divIcon({
                     className: 'user-marker',
@@ -936,14 +960,12 @@
                   userMarker.setLatLng(userLatLng);
                 }
 
-                // 2. Check distance to all RVM units
                 let isNear = false;
                 latestDevices.forEach(device => {
                   if (device.location && device.location.includes(',')) {
                     const [dLat, dLng] = device.location.split(',').map(Number);
                     const rvmLatLng = L.latLng(dLat, dLng);
 
-                    // Leaflet's built-in distance calculator (returns meters)
                     const distance = map.distance(userLatLng, rvmLatLng);
                     if (distance <= PROXIMITY_THRESHOLD) {
                       isNear = true;
@@ -951,7 +973,6 @@
                   }
                 });
 
-                // 3. Show or hide the proximity alert based on distance
                 document.getElementById('proximity-alert').style.display = isNear ? 'block' : 'none';
               }
             },
@@ -963,7 +984,6 @@
             { enableHighAccuracy: true, maximumAge: 10000 }
           );
 
-          // Update Button State
           isLocationEnabled = true;
           btn.textContent = "Akses Lokasi ON";
           btn.classList.add("enabled");
@@ -994,10 +1014,9 @@
       btn.classList.add("disabled");
     }
 
-    // Attach the click event to the new button
     document.getElementById('locationToggleBtn').addEventListener('click', (e) => {
       toggleLocationTracking();
-      e.stopPropagation(); // Prevents the menu from closing when toggling
+      e.stopPropagation();
     });
 
     document.getElementById('menuBtn').addEventListener('click', (e) => {
@@ -1011,7 +1030,6 @@
       e.stopPropagation();
     });
 
-    // Close dropdown when clicking elsewhere
     window.addEventListener('click', () => {
       document.getElementById('dropdownMenu').style.display = 'none';
     });
@@ -1033,7 +1051,6 @@
       renderWeek();
     });
 
-    // Authentication state update for logout visibility
     onAuthStateChanged(auth, (user) => {
       const authSection = document.getElementById('authSection');
       if (user) {
