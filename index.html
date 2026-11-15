@@ -249,7 +249,7 @@
     </div>
   </div>
 
-  <!-- Live Feed Modal (Ditambahkan style="display: none;" agar tersembunyi secara default saat reload) -->
+  <!-- Live Feed Modal -->
   <div id="cameraOverlay" aria-hidden="true" style="display: none;">
     <div class="camera-card">
       <div class="header-row">
@@ -334,7 +334,14 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut,
+      setPersistence,
+      browserSessionPersistence
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBGM19XQWBU3QLQD8hOE2AFJxYg5AdaRNI",
@@ -347,13 +354,19 @@
       measurementId: "G-GVTFYYQBRY"
     };
 
-    const app = initializeApp(firebaseConfig);
+    // Gunakan nama instance khusus "MonitoringApp" agar terpisah total dari sesi Dashboard User
+    const app = initializeApp(firebaseConfig, "MonitoringApp");
     const db = getDatabase(app);
     const auth = getAuth(app);
+
+    // Daftar email khusus Admin / Pengelola
+    const ADMIN_EMAILS = ["admin@fit.com"];
+
     const overlay = document.getElementById('loginOverlay');
     const dashboard = document.getElementById('dashboard');
     const authSection = document.getElementById('authSection');
     const userEmailSpan = document.getElementById('userEmail');
+    const errorMsg = document.getElementById('errorMsg');
 
     const API_URL = "vtelyu.nazrielariel2005.workers.dev";
 
@@ -414,8 +427,16 @@
       });
     }
 
+    // Listener Autentikasi Tunggal dengan Pengecekan Role Admin
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        if (!ADMIN_EMAILS.includes(user.email)) {
+          errorMsg.innerText = "Akses ditolak: Akun ini bukan akun Admin.";
+          signOut(auth);
+          return;
+        }
+
+        errorMsg.innerText = "";
         overlay.style.display = 'none';
         dashboard.style.display = 'grid';
         authSection.style.display = 'flex';
@@ -429,12 +450,26 @@
     });
 
     document.getElementById('loginBtn').addEventListener('click', () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-      signInWithEmailAndPassword(auth, email, password)
+      if (!email || !password) {
+        errorMsg.innerText = "Email dan password tidak boleh kosong.";
+        return;
+      }
+
+      if (!ADMIN_EMAILS.includes(email)) {
+        errorMsg.innerText = "Email ini tidak memiliki akses Dashboard Monitoring.";
+        return;
+      }
+
+      // Gunakan SESSION persistence agar sesi admin hanya berlaku di tab/sesi ini
+      setPersistence(auth, browserSessionPersistence)
+        .then(() => {
+          return signInWithEmailAndPassword(auth, email, password);
+        })
         .catch((error) => {
-          document.getElementById('errorMsg').innerText = "Login failed: Invalid email or password.";
+          errorMsg.innerText = "Login gagal: Email atau password salah.";
         });
     });
 
@@ -740,32 +775,6 @@
             startInput.max = endInput.value;
           });
 
-          document.getElementById('applyDateFilter').addEventListener('click', () => {
-            const startVal = startInput.value;
-            const endVal = endInput.value;
-
-            if (!startVal || !endVal) {
-              alert("Silakan pilih kedua tanggal untuk menyaring (Please select both dates).");
-              return;
-            }
-
-            const startTimestamp = new Date(startVal).getTime();
-            const endTimestamp = new Date(endVal + 'T23:59:59').getTime();
-
-            if (startTimestamp > endTimestamp) {
-              alert("Tanggal mulai tidak boleh lebih besar dari tanggal akhir (Start date cannot be after end date).");
-              return;
-            }
-
-            historyData = fullHistoryData.filter(row => {
-              const rowTime = parseDateString(row.timestamp);
-              return rowTime >= startTimestamp && rowTime <= endTimestamp;
-            });
-
-            weekIndex = 0;
-            renderWeek();
-          });
-
           startInput.value = oldestDateStr;
           endInput.value = newestDateStr;
 
@@ -1043,27 +1052,16 @@
       }
       const startTimestamp = new Date(startVal).getTime();
       const endTimestamp = new Date(endVal + 'T23:59:59').getTime();
+      if (startTimestamp > endTimestamp) {
+        alert("Tanggal mulai tidak boleh lebih besar dari tanggal akhir.");
+        return;
+      }
       historyData = fullHistoryData.filter(row => {
         const rowTime = parseDateString(row.timestamp);
         return rowTime >= startTimestamp && rowTime <= endTimestamp;
       });
       weekIndex = 0;
       renderWeek();
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      const authSection = document.getElementById('authSection');
-      if (user) {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'grid';
-        authSection.style.display = 'flex';
-        document.getElementById('userEmail').innerText = user.email;
-        startApp();
-      } else {
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('dashboard').style.display = 'none';
-        authSection.style.display = 'none';
-      }
     });
 
     document.getElementById('closeHistory').addEventListener('click', closeHistory);

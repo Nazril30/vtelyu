@@ -1,5 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import {getMessaging, getToken, deleteToken, onMessage} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getMessaging, getToken, deleteToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
 // Firebase configuration di project setting -> General 
 const firebaseConfig = { 
@@ -13,45 +13,50 @@ const firebaseConfig = {
   measurementId: "G-GVTFYYQBRY"
 };
 
-const app = initializeApp(firebaseConfig);
-// Commented part = code attempt used for mobile app
-// let messaging = null;
-// if ('Notification' in window) {
-//     messaging = getMessaging(app);
-// } else {
-//     console.log("Android WebView detected. Skipping Firebase Web SDK initialization.");
-// }
+// Gunakan instance "MonitoringApp" yang sama dengan index.html agar tidak bentrok dengan Dashboard User
+const app = getApps().some(a => a.name === "MonitoringApp") 
+  ? getApp("MonitoringApp") 
+  : initializeApp(firebaseConfig, "MonitoringApp");
+
 const messaging = getMessaging(app);
 
 window.enableFCM = async function () {
-  // if (!('Notification' in window)) {
-  //   console.log("Running in Android WebView. Skipping Web Push.");
-  //   alert("Notifications are automatically handled by the Android App!");
-  //   return; // Stop running here so it never hits the crash below!
-  // }
   console.log("Button clicked, requesting permission...");
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") {alert("Notification permission gagal");
+  if (permission !== "granted") {
+    alert("Notification permission gagal");
     return;
   }
   console.log("Browser returned:", permission);
+  
   if ('serviceWorker' in navigator) {
-    try {await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-    } catch (err) {console.error("Service Worker registration failed:", err);
+    try {
+      await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    } catch (err) {
+      console.error("Service Worker registration failed:", err);
       return;
     }
   }
+  
   const registration = await navigator.serviceWorker.ready;
-  try {const token = await getToken(messaging, {
-      vapidKey: "BE2c88nev-lHX6l_wrW2CoI86EEgX2Ybez9QdaD7ptpUi0Jx4SbBSbu4bQe_PX-B8g1eIrsbhSt7UIMa7coZsnE", // VAPID key from Firebase project settings -> Cloud Messaging
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: "BE2c88nev-lHX6l_wrW2CoI86EEgX2Ybez9QdaD7ptpUi0Jx4SbBSbu4bQe_PX-B8g1eIrsbhSt7UIMa7coZsnE",
       serviceWorkerRegistration: registration
     });
-    if (!token) {alert("Failed to get FCM token");
+    
+    if (!token) {
+      alert("Failed to get FCM token");
       return;
     }
+    
     localStorage.setItem("fcmToken", token);
     localStorage.setItem("notificationsEnabled", "true");
-    await fetch("https://vtelyu.nazrielariel2005.workers.dev/register-token", {method: "POST", body: token}); // 
+    await fetch("https://vtelyu.nazrielariel2005.workers.dev/register-token", {
+      method: "POST", 
+      body: token
+    });
+    
     console.log("FCM TOKEN:", token);
     console.log("Token Sent to Cloudflare");
     return token;
@@ -63,21 +68,30 @@ window.enableFCM = async function () {
 
 window.disableFCM = async function () {
   const token = localStorage.getItem("fcmToken");
-  if (!token) {localStorage.setItem("notificationsEnabled", "false");
+  if (!token) {
+    localStorage.setItem("notificationsEnabled", "false");
     return;
   }
-  try {await fetch("https://vtelyu.nazrielariel2005.workers.dev/unregister-token", {
+  
+  try {
+    await fetch("https://vtelyu.nazrielariel2005.workers.dev/unregister-token", {
       method: "POST",
       body: token
     });
-    if ('serviceWorker' in navigator) {const registration = await navigator.serviceWorker.getRegistration('./');
-      if (registration) {const existingSub = await registration.pushManager.getSubscription();
-        if (existingSub) {await existingSub.unsubscribe();
+    
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration('./');
+      if (registration) {
+        const existingSub = await registration.pushManager.getSubscription();
+        if (existingSub) {
+          await existingSub.unsubscribe();
           console.log("Browser push subscription safely removed.");
         }
       }
     }
-    try {await deleteToken(messaging);
+    
+    try {
+      await deleteToken(messaging);
     } catch (fbError) {
       console.log("Note: Firebase background token deletion skipped (expected on subfolder hosting).");
     }
