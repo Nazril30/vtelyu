@@ -66,6 +66,60 @@ body {
   display: none;
 }
 
+.location-search {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.location-search label {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.location-search input {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 12px 14px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font: inherit;
+}
+
+.location-search input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.location-search input::placeholder {
+  color: var(--muted);
+}
+
+#locationSearchStatus {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.location-search-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 18px;
+  color: var(--muted);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+}
+
 /* Header Navbar */
 header {
   padding: 16px 36px;
