@@ -80,18 +80,20 @@
 
   <!-- Main Dashboard Grid -->
   <main id="dashboard">
+    <!-- Kotak Pencarian Lokasi -->
     <div class="location-search">
-      <label for="locationSearch">Cari Lokasi</label>
-      <input
-        type="search"
-        id="locationSearch"
-        placeholder="Cari FIT, GKU, atau TULT"
+      <label for="locationSearchInput">Cari Lokasi</label>
+      <span id="locationSearchStatus">Menampilkan 0 dari 0 lokasi</span>
+      <input 
+        type="text" 
+        id="locationSearchInput" 
+        placeholder="Cari FIT, GKU, atau TULT" 
         autocomplete="off"
-        aria-describedby="locationSearchStatus"
       >
-      <span id="locationSearchStatus" aria-live="polite"></span>
     </div>
-    <p id="locationSearchEmpty" class="location-search-empty" hidden>Tidak ada lokasi yang cocok.</p>
+    <p id="locationSearchEmpty" class="location-search-empty" style="display: none;">
+      Lokasi unit RVM tidak ditemukan.
+    </p>
 
     <section class="card" data-template="true" aria-label="RVM Unit">
       <span class="status-text" style="display: none;">Offline</span>
@@ -538,14 +540,43 @@
       return record.cum + currentVal;
     }
 
+    // --- Fungsi Filter Pencarian Lokasi ---
+    function filterLocationCards() {
+      const searchInput = document.getElementById('locationSearchInput');
+      const statusText = document.getElementById('locationSearchStatus');
+      const emptyMsg = document.getElementById('locationSearchEmpty');
+      if (!searchInput) return;
+
+      const keyword = searchInput.value.toLowerCase().trim();
+      const cards = document.querySelectorAll('#dashboard .card:not([data-template="true"])');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const locName = (card.getAttribute('data-locname') || '').toLowerCase();
+        const mac = (card.getAttribute('data-id') || '').toLowerCase();
+        const isMatch = locName.includes(keyword) || mac.includes(keyword);
+
+        card.style.display = isMatch ? 'block' : 'none';
+        if (isMatch) visibleCount++;
+      });
+
+      if (statusText) {
+        statusText.innerText = `Menampilkan ${visibleCount} dari ${cards.length} lokasi`;
+      }
+      if (emptyMsg) {
+        emptyMsg.style.display = (cards.length > 0 && visibleCount === 0) ? 'block' : 'none';
+      }
+    }
+
+    document.getElementById('locationSearchInput')?.addEventListener('input', filterLocationCards);
+
     function generateCardsFromDevices(devices) {
       const dashboard = document.getElementById('dashboard');
       const template = dashboard.querySelector('[data-template="true"]');
 
-      Array.from(dashboard.children).forEach(child => {
-        if (child.classList.contains('card') && !child.hasAttribute('data-template')) {
-          dashboard.removeChild(child);
-        }
+      // Hanya hapus kartu RVM lama tanpa menghapus kotak pencarian
+      dashboard.querySelectorAll('.card:not([data-template="true"])').forEach(card => {
+        dashboard.removeChild(card);
       });
 
       devices.forEach((device, index) => {
@@ -556,7 +587,7 @@
         const rvmIndex = index + 1;
 
         clone.setAttribute('data-id', device.mac);
-        clone.setAttribute('data-locname', device.locationname || device.mac);
+        clone.setAttribute('data-locname', device.locationname);
         clone.setAttribute('data-index', rvmIndex);
 
         clone.querySelector('.rvm-title').innerText = device.locationname || device.mac;
@@ -571,28 +602,9 @@
         dashboard.appendChild(clone);
       });
 
-      applyLocationSearch();
+      // Update hasil filter dan indikator jumlah lokasi
+      filterLocationCards();
     }
-
-    function applyLocationSearch() {
-      const searchInput = document.getElementById('locationSearch');
-      const searchTerms = searchInput.value.trim().toLocaleLowerCase('id-ID').split(/\s+/).filter(Boolean);
-      const cards = Array.from(document.querySelectorAll('#dashboard > .card:not([data-template="true"])'));
-      let visibleCount = 0;
-
-      cards.forEach(card => {
-        const searchableText = `${card.getAttribute('data-locname') || ''} ${card.getAttribute('data-id') || ''}`.toLocaleLowerCase('id-ID');
-        const isMatch = searchTerms.length === 0 || searchTerms.some(term => searchableText.includes(term));
-        card.hidden = !isMatch;
-        if (isMatch) visibleCount += 1;
-      });
-
-      document.getElementById('locationSearchStatus').textContent =
-        `Menampilkan ${visibleCount} dari ${cards.length} lokasi`;
-      document.getElementById('locationSearchEmpty').hidden = searchTerms.length === 0 || visibleCount > 0;
-    }
-
-    document.getElementById('locationSearch').addEventListener('input', applyLocationSearch);
 
     function getDynamicColor(percentage) {
       const boundedPct = Math.min(percentage, 90);
