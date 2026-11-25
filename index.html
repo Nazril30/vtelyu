@@ -80,6 +80,19 @@
 
   <!-- Main Dashboard Grid -->
   <main id="dashboard">
+    <div class="location-search">
+      <label for="locationSearch">Cari Lokasi</label>
+      <input
+        type="search"
+        id="locationSearch"
+        placeholder="Cari FIT, GKU, atau TULT"
+        autocomplete="off"
+        aria-describedby="locationSearchStatus"
+      >
+      <span id="locationSearchStatus" aria-live="polite"></span>
+    </div>
+    <p id="locationSearchEmpty" class="location-search-empty" hidden>Tidak ada lokasi yang cocok.</p>
+
     <section class="card" data-template="true" aria-label="RVM Unit">
       <span class="status-text" style="display: none;">Offline</span>
       <span class="total-val" style="display: none;">-</span>
@@ -530,7 +543,9 @@
       const template = dashboard.querySelector('[data-template="true"]');
 
       Array.from(dashboard.children).forEach(child => {
-        if (!child.hasAttribute('data-template')) dashboard.removeChild(child);
+        if (child.classList.contains('card') && !child.hasAttribute('data-template')) {
+          dashboard.removeChild(child);
+        }
       });
 
       devices.forEach((device, index) => {
@@ -541,7 +556,7 @@
         const rvmIndex = index + 1;
 
         clone.setAttribute('data-id', device.mac);
-        clone.setAttribute('data-locname', device.locationname);
+        clone.setAttribute('data-locname', device.locationname || device.mac);
         clone.setAttribute('data-index', rvmIndex);
 
         clone.querySelector('.rvm-title').innerText = device.locationname || device.mac;
@@ -555,7 +570,29 @@
 
         dashboard.appendChild(clone);
       });
+
+      applyLocationSearch();
     }
+
+    function applyLocationSearch() {
+      const searchInput = document.getElementById('locationSearch');
+      const searchTerms = searchInput.value.trim().toLocaleLowerCase('id-ID').split(/\s+/).filter(Boolean);
+      const cards = Array.from(document.querySelectorAll('#dashboard > .card:not([data-template="true"])'));
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const searchableText = `${card.getAttribute('data-locname') || ''} ${card.getAttribute('data-id') || ''}`.toLocaleLowerCase('id-ID');
+        const isMatch = searchTerms.length === 0 || searchTerms.some(term => searchableText.includes(term));
+        card.hidden = !isMatch;
+        if (isMatch) visibleCount += 1;
+      });
+
+      document.getElementById('locationSearchStatus').textContent =
+        `Menampilkan ${visibleCount} dari ${cards.length} lokasi`;
+      document.getElementById('locationSearchEmpty').hidden = searchTerms.length === 0 || visibleCount > 0;
+    }
+
+    document.getElementById('locationSearch').addEventListener('input', applyLocationSearch);
 
     function getDynamicColor(percentage) {
       const boundedPct = Math.min(percentage, 90);
